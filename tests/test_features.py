@@ -1,6 +1,20 @@
+import os
+import pytest
 import pandas as pd
 
-from src.features.engineering import clean_raw, add_features, FEATURES, region_enc, mag_class
+from src.features.engineering import (
+    clean_raw,
+    add_features,
+    FEATURES,
+    region_enc,
+    mag_class,
+)
+
+# تخطي جميع الاختبارات في هذا الملف إذا لم يكن ملف البيانات موجوداً (مثل بيئة CI/CD)
+pytestmark = pytest.mark.skipif(
+    not os.path.exists("data/raw/database.csv"),
+    reason="Raw data not available in CI environment",
+)
 
 
 def test_add_features_creates_all_expected_columns():

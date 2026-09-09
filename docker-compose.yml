@@ -4,18 +4,21 @@ services:
   mlflow:
     image: python:3.11-slim
     working_dir: /mlflow
+    restart: always
     volumes:
       - ./mlruns:/mlflow/mlruns
     ports:
       - "5000:5000"
     command: >
       bash -c "pip install --no-cache-dir mlflow &&
-               mlflow server --host 0.0.0.0 --port 5000
+               mlflow server --host 0.00.0.0 --port 5000
                --backend-store-uri /mlflow/mlruns
                --default-artifact-root /mlflow/mlruns"
 
   api:
-    build: .
+    # التغيير الأهم: استخدام الصورة المبنية والمرفوعة عبر CI/CD
+    image: hasnaeamejoud/earthquake-mlops:latest
+    restart: always
     ports:
       - "8000:8000"
     environment:
@@ -27,6 +30,6 @@ services:
     depends_on:
       - mlflow
 
-# Run with: docker compose up --build
+# Run with: docker compose up -d --build
 # API:    http://localhost:8000/docs
 # MLflow: http://localhost:5000

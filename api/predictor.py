@@ -14,15 +14,9 @@ import joblib
 from src.features.engineering import FEATURES, region_enc
 from src.explainability.shap_explainer import explain_prediction
 
+MLFLOW_TRACKING_URI = os.environ.get("MLFLOW_TRACKING_URI", "http://localhost:5000")
 
-MLFLOW_TRACKING_URI = os.environ.get(
-    "MLFLOW_TRACKING_URI",
-    "http://localhost:5000"
-)
-
-USE_MLFLOW_REGISTRY = (
-    os.environ.get("USE_MLFLOW_REGISTRY", "false").lower() == "true"
-)
+USE_MLFLOW_REGISTRY = os.environ.get("USE_MLFLOW_REGISTRY", "false").lower() == "true"
 
 
 class Predictor:
@@ -65,29 +59,17 @@ class Predictor:
 
         # Fallback to local models
         if self.classifier is None:
-            self.classifier = joblib.load(
-                "models/best_classifier.pkl"
-            )
+            self.classifier = joblib.load("models/best_classifier.pkl")
 
-            self.regressor = joblib.load(
-                "models/best_regressor.pkl"
-            )
+            self.regressor = joblib.load("models/best_regressor.pkl")
 
-            self.scaler = joblib.load(
-                "models/scaler.pkl"
-            )
+            self.scaler = joblib.load("models/scaler.pkl")
 
-            self.label_encoder = joblib.load(
-                "models/label_encoder.pkl"
-            )
+            self.label_encoder = joblib.load("models/label_encoder.pkl")
 
-            self.type_encoder = joblib.load(
-                "models/type_encoder.pkl"
-            )
+            self.type_encoder = joblib.load("models/type_encoder.pkl")
 
-            print(
-                "[predictor] Loaded models from local models/*.pkl"
-            )
+            print("[predictor] Loaded models from local models/*.pkl")
 
     def build_features(self, payload: dict) -> np.ndarray:
         """
@@ -101,9 +83,8 @@ class Predictor:
         # Encode earthquake type
         type_str = payload.get("type", "Earthquake")
 
-        if (
-            self.type_encoder is not None
-            and type_str in list(self.type_encoder.classes_)
+        if self.type_encoder is not None and type_str in list(
+            self.type_encoder.classes_
         ):
             type_enc = self.type_encoder.transform([type_str])[0]
         else:
@@ -115,31 +96,21 @@ class Predictor:
             "Latitude": lat,
             "Longitude": lon,
             "Depth": depth,
-
             "Year": payload["year"],
             "Month": payload["month"],
             "Day": payload["day"],
             "Hour": payload["hour"],
-
             "Type_enc": type_enc,
             "Region_enc": region_enc(lat, lon),
-
             # Same binning logic as dbt + training
             "lat_bin": int(np.floor((lat + 90) / 10)),
             "lon_bin": int(np.floor((lon + 180) / 10)),
-
-            "distance_center": float(
-                np.sqrt(lat ** 2 + lon ** 2)
-            ),
-
+            "distance_center": float(np.sqrt(lat**2 + lon**2)),
             "is_deep": int(depth > 300),
         }
 
         # Respect the exact training feature order
-        X = np.array(
-            [[row[feature] for feature in FEATURES]],
-            dtype=float
-        )
+        X = np.array([[row[feature] for feature in FEATURES]], dtype=float)
 
         return X
 
@@ -157,9 +128,7 @@ class Predictor:
         pred_class_idx = self.classifier.predict(X)[0]
 
         if self.label_encoder is not None:
-            pred_class = self.label_encoder.inverse_transform(
-                [pred_class_idx]
-            )[0]
+            pred_class = self.label_encoder.inverse_transform([pred_class_idx])[0]
         else:
             pred_class = str(pred_class_idx)
 
@@ -175,32 +144,20 @@ class Predictor:
         # -----------------------------
         # Regression
         # -----------------------------
-        pred_magnitude = float(
-            self.regressor.predict(X)[0]
-        )
+        pred_magnitude = float(self.regressor.predict(X)[0])
 
         # -----------------------------
         # SHAP explanation
         # -----------------------------
-        explanation = explain_prediction(
-            self.classifier,
-            X,
-            top_k=5
-        )
+        explanation = explain_prediction(self.classifier, X, top_k=5)
 
         # -----------------------------
         # Final response
         # -----------------------------
         return {
             "predicted_class": pred_class,
-            "predicted_magnitude": round(
-                pred_magnitude,
-                2
-            ),
-            "confidence": round(
-                confidence,
-                4
-            ),
+            "predicted_magnitude": round(pred_magnitude, 2),
+            "confidence": round(confidence, 4),
             "explanation": explanation,
             "_features": X,
         }

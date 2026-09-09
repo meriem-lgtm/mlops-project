@@ -5,9 +5,15 @@ Standalone evaluation utilities, reusable from Dagster, tests, or notebooks.
 """
 
 from sklearn.metrics import (
-    accuracy_score, f1_score, recall_score, precision_score,
-    confusion_matrix, classification_report,
-    mean_absolute_error, mean_squared_error, r2_score,
+    accuracy_score,
+    f1_score,
+    recall_score,
+    precision_score,
+    confusion_matrix,
+    classification_report,
+    mean_absolute_error,
+    mean_squared_error,
+    r2_score,
 )
 import numpy as np
 

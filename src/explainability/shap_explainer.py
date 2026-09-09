@@ -12,7 +12,9 @@ import shap
 from src.features.engineering import FEATURES
 
 
-def explain_prediction(model, X_row: np.ndarray, background: np.ndarray | None = None, top_k: int = 5) -> dict:
+def explain_prediction(
+    model, X_row: np.ndarray, background: np.ndarray | None = None, top_k: int = 5
+) -> dict:
     """
     model: a fitted sklearn/xgboost/lightgbm classifier or regressor
     X_row: shape (1, n_features), same feature order as FEATURES
@@ -45,8 +47,19 @@ def explain_prediction(model, X_row: np.ndarray, background: np.ndarray | None =
 
     explanation = {}
     for name, val in contributions[:top_k]:
-        strength = "+++" if val > 0.5 else "++" if val > 0.15 else "+" if val > 0 else \
-                   "---" if val < -0.5 else "--" if val < -0.15 else "-"
+        strength = (
+            "+++"
+            if val > 0.5
+            else (
+                "++"
+                if val > 0.15
+                else (
+                    "+"
+                    if val > 0
+                    else "---" if val < -0.5 else "--" if val < -0.15 else "-"
+                )
+            )
+        )
         explanation[name] = {"impact": round(float(val), 4), "direction": strength}
 
     return explanation

@@ -5,8 +5,7 @@ from dagster import asset, AssetExecutionContext, AssetIn, Failure
 
 @asset(ins={"earthquake_features": AssetIn()})
 def data_quality_check(
-    context: AssetExecutionContext,
-    earthquake_features: str
+    context: AssetExecutionContext, earthquake_features: str
 ) -> bool:
     """
     Runs dbt tests against the transformed earthquake data.
@@ -38,9 +37,7 @@ def data_quality_check(
 
         raise Failure(
             description="Data quality checks FAILED - training will not run.",
-            metadata={
-                "dbt_output": result.stdout[-2000:]
-            },
+            metadata={"dbt_output": result.stdout[-2000:]},
         )
 
     context.log.info("Data quality checks PASSED.")

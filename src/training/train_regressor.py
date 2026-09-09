@@ -8,6 +8,7 @@ logs the run to MLflow and registers it as 'earthquake_regressor'.
 import os
 import sys
 import warnings
+
 warnings.filterwarnings("ignore")
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -29,7 +30,6 @@ from src.features.engineering import (
     FEATURES,
 )
 from src.data.prepare import load_dataset
-
 
 RANDOM_STATE = 42
 MLFLOW_EXPERIMENT = "earthquake_regression"
@@ -56,6 +56,7 @@ def get_regression_data():
     y = df["Magnitude"]
 
     return X, y.values
+
 
 def main():
     mlflow.set_experiment(MLFLOW_EXPERIMENT)

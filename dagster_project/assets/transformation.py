@@ -3,10 +3,7 @@ from dagster import asset, AssetExecutionContext, AssetIn
 
 
 @asset(ins={"raw_earthquakes": AssetIn()})
-def earthquake_features(
-    context: AssetExecutionContext,
-    raw_earthquakes: str
-) -> str:
+def earthquake_features(context: AssetExecutionContext, raw_earthquakes: str) -> str:
     """
     Runs dbt build (staging -> intermediate -> marts)
     on top of DuckDB.

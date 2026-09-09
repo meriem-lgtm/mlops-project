@@ -2,7 +2,6 @@ from fastapi import FastAPI
 
 from api.routes import router
 
-
 app = FastAPI(
     title="EarthquakeSafe API",
     description="Predicts earthquake magnitude class and value, with SHAP explanations.",

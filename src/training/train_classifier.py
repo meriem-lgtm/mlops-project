@@ -41,7 +41,6 @@ from src.features.engineering import (
     FEATURES,
 )
 
-
 RANDOM_STATE = 42
 MLFLOW_EXPERIMENT = "earthquake_classification"
 REGISTERED_MODEL_NAME = "earthquake_classifier"
@@ -53,17 +52,20 @@ def get_training_data():
     if "magnitude_class" not in df.columns:
         # Dataset came from raw CSV / raw_earthquakes
         df.columns = [
-            c.strip().title()
-            if c.lower() in (
-                "date",
-                "time",
-                "latitude",
-                "longitude",
-                "type",
-                "depth",
-                "magnitude",
+            (
+                c.strip().title()
+                if c.lower()
+                in (
+                    "date",
+                    "time",
+                    "latitude",
+                    "longitude",
+                    "type",
+                    "depth",
+                    "magnitude",
+                )
+                else c
             )
-            else c
             for c in df.columns
         ]
 
@@ -106,14 +108,12 @@ def main():
             max_iter=1000,
             class_weight="balanced",
         ),
-
         "RandomForest": RandomForestClassifier(
             n_estimators=300,
             class_weight="balanced",
             random_state=RANDOM_STATE,
             n_jobs=-1,
         ),
-
         "XGBoost": xgb.XGBClassifier(
             n_estimators=600,
             max_depth=7,
@@ -123,7 +123,6 @@ def main():
             eval_metric="mlogloss",
             random_state=RANDOM_STATE,
         ),
-
         "LightGBM": lgb.LGBMClassifier(
             n_estimators=500,
             learning_rate=0.05,
@@ -178,9 +177,7 @@ def main():
                 name,
             )
 
-            mlflow.log_params(
-                model.get_params()
-            )
+            mlflow.log_params(model.get_params())
 
             mlflow.log_metric(
                 "accuracy",
@@ -209,28 +206,17 @@ def main():
                 serialization_format="pickle",
             )
 
-            print(
-                f"{name}: "
-                f"acc={acc:.3f} "
-                f"f1={f1:.3f} "
-                f"recall={rec:.3f}"
-            )
+            print(f"{name}: " f"acc={acc:.3f} " f"f1={f1:.3f} " f"recall={rec:.3f}")
 
             if f1 > best_f1:
                 best_f1 = f1
                 best_name = name
                 best_model = model
 
-    print(
-        f"\nBEST MODEL: "
-        f"{best_name} "
-        f"(f1={best_f1:.3f})"
-    )
+    print(f"\nBEST MODEL: " f"{best_name} " f"(f1={best_f1:.3f})")
 
     # Register the best model
-    with mlflow.start_run(
-        run_name=f"{best_name}_registered"
-    ):
+    with mlflow.start_run(run_name=f"{best_name}_registered"):
 
         mlflow.log_param(
             "model_type",
@@ -280,10 +266,7 @@ def main():
         "models/features.pkl",
     )
 
-    print(
-        "Saved local copies to models/ "
-        "(used as fallback by the API)."
-    )
+    print("Saved local copies to models/ " "(used as fallback by the API).")
 
 
 if __name__ == "__main__":

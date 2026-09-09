@@ -5,10 +5,7 @@ from dagster import asset, AssetExecutionContext, AssetIn
 
 
 @asset(ins={"data_quality_check": AssetIn()})
-def trained_models(
-    context: AssetExecutionContext,
-    data_quality_check: bool
-) -> str:
+def trained_models(context: AssetExecutionContext, data_quality_check: bool) -> str:
 
     scripts = [
         "src/training/train_classifier.py",
@@ -36,9 +33,7 @@ def trained_models(
             if result.stderr:
                 context.log.error(result.stderr)
 
-            raise RuntimeError(
-                f"{script} failed with exit code {result.returncode}"
-            )
+            raise RuntimeError(f"{script} failed with exit code {result.returncode}")
 
     context.log.info("All ML models trained successfully.")
 

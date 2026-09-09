@@ -14,10 +14,19 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
 FEATURES = [
-    "Latitude", "Longitude", "Depth",
-    "Year", "Month", "Day", "Hour",
-    "Type_enc", "Region_enc", "lat_bin", "lon_bin",
-    "distance_center", "is_deep",
+    "Latitude",
+    "Longitude",
+    "Depth",
+    "Year",
+    "Month",
+    "Day",
+    "Hour",
+    "Type_enc",
+    "Region_enc",
+    "lat_bin",
+    "lon_bin",
+    "distance_center",
+    "is_deep",
 ]
 
 
@@ -71,7 +80,9 @@ def add_features(df: pd.DataFrame, type_encoder: LabelEncoder | None = None):
     df["Day"] = df["Datetime"].dt.day
     df["Hour"] = df["Datetime"].dt.hour
 
-    df["Region_enc"] = [region_enc(a, b) for a, b in zip(df["Latitude"], df["Longitude"])]
+    df["Region_enc"] = [
+        region_enc(a, b) for a, b in zip(df["Latitude"], df["Longitude"])
+    ]
     df["lat_bin"] = np.floor((df["Latitude"] + 90) / 10).astype(int)
     df["lon_bin"] = np.floor((df["Longitude"] + 180) / 10).astype(int)
 
@@ -81,18 +92,21 @@ def add_features(df: pd.DataFrame, type_encoder: LabelEncoder | None = None):
     else:
         # unseen categories at inference time fall back to 0
         classes = list(type_encoder.classes_)
-        df["Type_enc"] = df["Type"].astype(str).apply(
-            lambda t: type_encoder.transform([t])[0] if t in classes else 0
+        df["Type_enc"] = (
+            df["Type"]
+            .astype(str)
+            .apply(lambda t: type_encoder.transform([t])[0] if t in classes else 0)
         )
 
     df["distance_center"] = np.sqrt(df["Latitude"] ** 2 + df["Longitude"] ** 2)
-   
+
     df["is_deep"] = (df["Depth"] > 300).astype(int)
 
     if "Magnitude" in df.columns:
         df["magnitude_class"] = df["Magnitude"].apply(mag_class)
 
     return df, type_encoder
+
 
 def ensure_ml_features(df: pd.DataFrame, type_encoder: LabelEncoder | None = None):
     """
@@ -111,7 +125,7 @@ def ensure_ml_features(df: pd.DataFrame, type_encoder: LabelEncoder | None = Non
         "type": "Type",
         "year": "Year",
         "month": "Month",
-         "day": "Day",
+        "day": "Day",
         "hour": "Hour",
         "region_enc": "Region_enc",
         "lat_bin": "lat_bin",
@@ -128,20 +142,18 @@ def ensure_ml_features(df: pd.DataFrame, type_encoder: LabelEncoder | None = Non
 
     if type_encoder is None:
         type_encoder = LabelEncoder()
-        df["Type_enc"] = type_encoder.fit_transform(
-            df["Type"].astype(str)
-        )
+        df["Type_enc"] = type_encoder.fit_transform(df["Type"].astype(str))
     else:
         classes = set(type_encoder.classes_)
-        df["Type_enc"] = df["Type"].astype(str).apply(
-            lambda t: (
-                type_encoder.transform([t])[0]
-                if t in classes
-                else 0
-            )
+        df["Type_enc"] = (
+            df["Type"]
+            .astype(str)
+            .apply(lambda t: (type_encoder.transform([t])[0] if t in classes else 0))
         )
 
     return df, type_encoder
+
+
 def build_feature_matrix(df: pd.DataFrame):
     X = df[FEATURES].fillna(0).values
     return X

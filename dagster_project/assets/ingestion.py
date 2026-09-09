@@ -22,8 +22,6 @@ def raw_earthquakes(context: AssetExecutionContext) -> str:
         if result.stderr:
             context.log.error(result.stderr)
 
-        raise RuntimeError(
-            f"dlt ingestion failed with exit code {result.returncode}"
-        )
+        raise RuntimeError(f"dlt ingestion failed with exit code {result.returncode}")
 
     return "data/warehouse/earthquakes.duckdb"

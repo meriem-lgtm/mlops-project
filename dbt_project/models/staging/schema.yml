@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: stg_earthquakes
+    description: "Cleaned raw earthquakes, one row per event."
+    columns:
+      - name: id
+        tests:
+          - unique
+      - name: latitude
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: -90
+              max_value: 90
+      - name: longitude
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: -180
+              max_value: 180
+      - name: magnitude
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 10
+      - name: depth
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 800

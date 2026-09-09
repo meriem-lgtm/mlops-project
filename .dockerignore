@@ -1,0 +1,17 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.git/
+.github/
+mlruns/
+data/warehouse/
+data/processed/
+*.duckdb
+*.db
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.streamlit/
+dagster_home/
+logs/

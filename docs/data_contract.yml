@@ -1,0 +1,51 @@
+# Data Contract — earthquake_features
+# Defines what downstream consumers (ML training, API, Dagster) can rely on.
+
+table: earthquake_features
+owner: ml-team
+version: 1.0.0
+
+fields:
+  latitude:
+    type: float
+    nullable: false
+    min: -90
+    max: 90
+
+  longitude:
+    type: float
+    nullable: false
+    min: -180
+    max: 180
+
+  depth:
+    type: float
+    nullable: false
+    min: 0
+    max: 800
+
+  magnitude:
+    type: float
+    nullable: false
+    min: 0
+    max: 10
+
+  type:
+    type: string
+    nullable: false
+    allowed_values: [Earthquake, Nuclear Explosion, Explosion, Rock Burst]
+
+  magnitude_class:
+    type: string
+    nullable: false
+    allowed_values: [Faible, Moyen, Fort]
+
+  event_datetime:
+    type: timestamp
+    nullable: false
+
+guarantees:
+  - no duplicate `id`
+  - all numeric fields respect their min/max bounds
+  - event_datetime is always parseable from date + time
+  - schema changes require a version bump and PR review

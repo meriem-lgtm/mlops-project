@@ -1,0 +1,9 @@
+# Copy this to ~/.dbt/profiles.yml (or set DBT_PROFILES_DIR=./dbt_project)
+earthquake_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: data/warehouse/earthquakes.duckdb
+      schema: main
+      threads: 4

@@ -36,29 +36,48 @@ class Predictor:
         if USE_MLFLOW_REGISTRY:
             try:
                 import mlflow
+
                 mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-                self.classifier = mlflow.pyfunc.load_model("models:/earthquake_classifier/Production")
-                self.regressor = mlflow.pyfunc.load_model("models:/earthquake_regressor/Production")
+                self.classifier = mlflow.pyfunc.load_model(
+                    "models:/earthquake_classifier/Production"
+                )
+                self.regressor = mlflow.pyfunc.load_model(
+                    "models:/earthquake_regressor/Production"
+                )
                 print("[predictor] Loaded models from MLflow Model Registry")
             except Exception as e:
-                print(f"[predictor] Could not load from MLflow ({e}); falling back to local .pkl files")
+                print(
+                    f"[predictor] Could not load from MLflow ({e}); falling back to local .pkl files"
+                )
 
         # Fallback to local models (Safe Mode for CI/CD)
         if self.classifier is None:
             model_dir = "models"
             if not os.path.exists(model_dir):
-                print("[predictor] ⚠️ Warning: 'models' directory not found. Running without local models (Expected in CI/CD).")
+                print(
+                    "[predictor] ⚠️ Warning: 'models' directory not found. Running without local models (Expected in CI/CD)."
+                )
                 return  # نخرج بأمان دون إيقاف البرنامج
 
             try:
-                self.classifier = joblib.load(os.path.join(model_dir, "best_classifier.pkl"))
-                self.regressor = joblib.load(os.path.join(model_dir, "best_regressor.pkl"))
+                self.classifier = joblib.load(
+                    os.path.join(model_dir, "best_classifier.pkl")
+                )
+                self.regressor = joblib.load(
+                    os.path.join(model_dir, "best_regressor.pkl")
+                )
                 self.scaler = joblib.load(os.path.join(model_dir, "scaler.pkl"))
-                self.label_encoder = joblib.load(os.path.join(model_dir, "label_encoder.pkl"))
-                self.type_encoder = joblib.load(os.path.join(model_dir, "type_encoder.pkl"))
+                self.label_encoder = joblib.load(
+                    os.path.join(model_dir, "label_encoder.pkl")
+                )
+                self.type_encoder = joblib.load(
+                    os.path.join(model_dir, "type_encoder.pkl")
+                )
                 print("[predictor] Loaded models from local models/*.pkl")
             except FileNotFoundError as e:
-                print(f"[predictor] ⚠️ Warning: Could not find local model files ({e}). Running without them.")
+                print(
+                    f"[predictor] ⚠️ Warning: Could not find local model files ({e}). Running without them."
+                )
             except Exception as e:
                 print(f"[predictor] ⚠️ Warning: Unexpected error loading models: {e}")
 
@@ -73,7 +92,9 @@ class Predictor:
         # Encode earthquake type
         type_str = payload.get("type", "Earthquake")
 
-        if self.type_encoder is not None and type_str in list(self.type_encoder.classes_):
+        if self.type_encoder is not None and type_str in list(
+            self.type_encoder.classes_
+        ):
             type_enc = self.type_encoder.transform([type_str])[0]
         else:
             # Unknown type → fallback value

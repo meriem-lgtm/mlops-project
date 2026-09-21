@@ -1,28 +1,28 @@
 services:
-  mlflow:
-    image: python:3.11-slim
-    working_dir: /mlflow
-    restart: always
-    volumes:
-      - ./mlruns:/mlflow/mlruns
-    ports:
-      - "5000:5000"
-    command: >
-      bash -c "pip install --no-cache-dir mlflow &&
-               mlflow server --host 0.0.0.0 --port 5000
-               --backend-store-uri /mlflow/mlruns
-               --default-artifact-root /mlflow/mlruns"
+mlflow:
+image: python:3.11-slim
+working_dir: /mlflow
+restart: always
+volumes:
+- ./mlruns:/mlflow/mlruns
+ports:
+- "5000:5000"
+command: >
+bash -c "pip install --no-cache-dir mlflow &&
+mlflow server --host 0.0.0.0 --port 5000
+--backend-store-uri /mlflow/mlruns
+--default-artifact-root /mlflow/mlruns"
 
-  api:
-    image: hasnaeamejoud/earthquake-mlops:latest
-    restart: always
-    ports:
-      - "8000:8000"
-    environment:
-      - MLFLOW_TRACKING_URI=http://mlflow:5000
-      - USE_MLFLOW_REGISTRY=false
-    volumes:
-      - ./models:/app/models
-      - ./data:/app/data
-    depends_on:
-      - mlflow
+api:
+image: hasnaeamejoud/earthquake-mlops:latest
+restart: always
+ports:
+- "8000:8000"
+environment:
+- MLFLOW_TRACKING_URI=http://mlflow:5000
+- USE_MLFLOW_REGISTRY=false
+volumes:
+- ./data:/app/data
+depends_on:
+- mlflow
+

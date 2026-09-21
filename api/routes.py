@@ -6,7 +6,6 @@ from api.schemas import PredictRequest, PredictResponse, HealthResponse
 from api.predictor import predictor
 from monitoring.metrics import metrics_store
 
-
 router = APIRouter()
 
 
@@ -28,10 +27,7 @@ def predict(request: PredictRequest):
     try:
         result = predictor.predict(request.model_dump())
 
-        metrics_store.record_prediction(
-            result["predicted_class"],
-            result["confidence"]
-        )
+        metrics_store.record_prediction(result["predicted_class"], result["confidence"])
 
         return {
             "predicted_class": result["predicted_class"],
@@ -47,7 +43,4 @@ def predict(request: PredictRequest):
     finally:
         latency = time.perf_counter() - start
 
-        metrics_store.record_request(
-            latency_s=latency,
-            error=error
-        )
+        metrics_store.record_request(latency_s=latency, error=error)

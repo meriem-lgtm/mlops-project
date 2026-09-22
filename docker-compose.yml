@@ -14,7 +14,7 @@ services:
       --default-artifact-root /mlflow/mlruns"
 
   api:
-    image: ton_pseudo_docker/le_nom_que_tu_veux:latest
+    image: hasnaeamejoud/earthquake-mlops:latest
     restart: always
     ports:
       - "8000:8000"
